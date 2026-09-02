@@ -1,0 +1,83 @@
+# La instancia pública de AriBuilder: Postgres, la web y el bot.
+#
+#   cp .env.example .env   (y rellenalo)
+#   docker compose up --build
+#
+# Postgres y no SQLite porque el disco de un contenedor es efímero y porque la
+# web y el bot son dos procesos: con un archivo compartido, cualquier despliegue
+# que los separe en máquinas distintas deja de funcionar sin avisar.
+
+x-db: &db
+  # La misma URL para todos: la construye Postgres abajo.
+  DATABASE_URL: postgresql://aribuilder:${POSTGRES_PASSWORD:?Falta POSTGRES_PASSWORD en .env}@db:5432/aribuilder
+
+services:
+  db:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: aribuilder
+      POSTGRES_DB: aribuilder
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Falta POSTGRES_PASSWORD en .env}
+    volumes:
+      - datos:/var/lib/postgresql/data
+    # Sin esto la web arranca antes de que Postgres acepte conexiones.
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U aribuilder -d aribuilder"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  # Crea (o actualiza) el esquema y termina. Web y bot esperan a que acabe bien.
+  init-db:
+    build:
+      context: .
+      target: init-db
+      args:
+        DATABASE_URL: postgresql://build/build
+    environment: *db
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: "no"
+
+  web:
+    build:
+      context: .
+      target: web
+      # Solo decide el `provider` de Prisma; la URL real llega por entorno.
+      args:
+        DATABASE_URL: postgresql://build/build
+    ports:
+      - "3000:3000"
+    environment:
+      <<: *db
+      AUTH_URL: ${AUTH_URL:-http://localhost:3000}
+      AUTH_SECRET: ${AUTH_SECRET:?Falta AUTH_SECRET, generalo con `npx auth secret`}
+      AUTH_TRUST_HOST: "true"
+      DISCORD_CLIENT_ID: ${DISCORD_CLIENT_ID:?Falta DISCORD_CLIENT_ID}
+      DISCORD_CLIENT_SECRET: ${DISCORD_CLIENT_SECRET:?Falta DISCORD_CLIENT_SECRET}
+      DISCORD_BOT_TOKEN: ${DISCORD_BOT_TOKEN:?Falta DISCORD_BOT_TOKEN}
+    depends_on:
+      init-db:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
+  bot:
+    build:
+      context: .
+      target: bot
+      args:
+        DATABASE_URL: postgresql://build/build
+    environment:
+      <<: *db
+      DISCORD_BOT_TOKEN: ${DISCORD_BOT_TOKEN:?Falta DISCORD_BOT_TOKEN}
+      DISCORD_CLIENT_ID: ${DISCORD_CLIENT_ID:?Falta DISCORD_CLIENT_ID}
+    # El bot lee los paneles de auto-rol que escribe la web: misma base.
+    depends_on:
+      init-db:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
+volumes:
+  datos:

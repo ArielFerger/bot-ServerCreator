@@ -1,0 +1,18 @@
+{
+  "name": "@aribuilder/bot",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch --env-file-if-exists=../../.env src/index.ts",
+    "start": "tsx --env-file-if-exists=../../.env src/index.ts",
+    "registrar": "tsx --env-file-if-exists=../../.env src/registrar.ts"
+  },
+  "dependencies": {
+    "@aribuilder/applier": "*",
+    "@aribuilder/core": "*",
+    "@prisma/client": "^6.1.0",
+    "discord.js": "^14.16.3",
+    "tsx": "^4.19.2"
+  }
+}

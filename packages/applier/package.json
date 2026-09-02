@@ -1,0 +1,14 @@
+{
+  "name": "@aribuilder/applier",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": { ".": "./src/index.ts" },
+  "dependencies": {
+    "@discordjs/rest": "^2.4.0",
+    "@aribuilder/core": "*",
+    "discord-api-types": "^0.37.115"
+  }
+}

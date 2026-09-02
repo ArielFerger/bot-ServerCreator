@@ -1,0 +1,38 @@
+@import "tailwindcss";
+
+@theme {
+  --color-fondo: #0f1116;
+  --color-panel: #171a21;
+  --color-panel-alto: #1e222b;
+  --color-borde: #2a2f3a;
+  --color-texto: #e6e8ec;
+  --color-tenue: #9aa3b2;
+  --color-marca: #5865f2;
+  --color-marca-claro: #7983f5;
+  --color-exito: #3ba55d;
+  --color-aviso: #faa61a;
+  --color-error: #ed4245;
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  background: var(--color-fondo);
+  color: var(--color-texto);
+  font-family: var(--font-sans);
+}
+
+/* La barra lateral de la vista previa imita a Discord, así que va con su scroll. */
+.scroll-fino::-webkit-scrollbar {
+  width: 8px;
+}
+.scroll-fino::-webkit-scrollbar-thumb {
+  background: var(--color-borde);
+  border-radius: 4px;
+}
+.scroll-fino::-webkit-scrollbar-track {
+  background: transparent;
+}

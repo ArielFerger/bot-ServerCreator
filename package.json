@@ -1,0 +1,36 @@
+{
+  "name": "aribuilder",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit -p packages/core && tsc --noEmit -p packages/applier && tsc --noEmit -p apps/bot && tsc --noEmit -p apps/web",
+    "db:proveedor": "node --env-file-if-exists=.env scripts/proveedor-db.mjs",
+    "db:push": "npm run db:proveedor && prisma db push",
+    "db:generate": "npm run db:proveedor && prisma generate",
+    "db:studio": "prisma studio",
+    "aplicar": "tsx --env-file-if-exists=.env packages/applier/src/cli.ts",
+    "dev": "concurrently --names \"web,bot\" --prefix-colors \"blue,magenta\" \"npm:dev:web\" \"npm:dev:bot\"",
+    "demo": "tsx --env-file-if-exists=.env scripts/sembrar-demo.ts",
+    "comprobar": "tsx --env-file-if-exists=.env scripts/comprobar.ts",
+    "dev:web": "npm run dev -w @aribuilder/web",
+    "dev:bot": "npm run dev -w @aribuilder/bot",
+    "build": "npm run db:generate && npm run build -w @aribuilder/web",
+    "registrar": "npm run registrar -w @aribuilder/bot"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "prisma": "^6.1.0",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8",
+    "concurrently": "^9.1.2"
+  },
+  "allowScripts": {}
+}

@@ -1,0 +1,11 @@
+node_modules
+**/node_modules
+.next
+**/.next
+.git
+# Los secretos nunca entran en la imagen. El `**/` es imprescindible: sin él,
+# el enlace simbólico apps/web/.env se copiaría roto y Next fallaría al leerlo.
+.env
+**/.env
+*.log
+prisma/dev.db*
