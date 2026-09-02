@@ -3,8 +3,8 @@
 // en local, Postgres en la instancia pública. No hay nada específico de una ni
 // de otra en el resto del esquema.
 datasource db {
-  provider = "sqlite"
-  url      = env("DATABASE_URL")
+  provider  = "sqlite"
+  url       = env("DATABASE_URL")
 }
 
 generator client {

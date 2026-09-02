@@ -17,18 +17,30 @@ Así que se puede empezar **solo con Vercel** y añadir el bot después. El paso
 
 ---
 
-## 1. Una base de datos Postgres
+## 1. Una base de datos Postgres (Supabase)
 
 SQLite no sirve: cada función de Vercel corre en un sistema de archivos efímero y aislado, así que
-un archivo no se comparte entre peticiones. Cualquier Postgres gestionado vale; el más directo es
-crear uno desde el propio panel de Vercel (**Storage → Create Database → Postgres**), que además
-deja la variable puesta sola.
+un archivo no se comparte entre peticiones. Cualquier Postgres gestionado vale —Supabase, Neon, el
+propio Vercel Postgres—; acá va con **Supabase**, que tiene plan gratuito.
 
-Cuando copies la URL, usá la **agrupada** (*pooled*, suele llevar `-pooler` en el host). Las
-funciones se crean y destruyen a montones y una conexión directa agota el límite del servidor.
+En <https://supabase.com/dashboard> → *New project*. Guardá la contraseña de la base, que solo se
+muestra una vez. Después, botón **Connect** arriba, y copiá **dos** cadenas distintas:
 
-El `provider` de Prisma se ajusta solo al compilar a partir de `DATABASE_URL`
-(`scripts/proveedor-db.mjs`): no hay que editar `prisma/schema.prisma`.
+| De Supabase | Va en | Para qué |
+|---|---|---|
+| **Transaction pooler**, puerto `6543` | `DATABASE_URL` | La app. Añadile `?pgbouncer=true` al final. |
+| **Session pooler**, puerto `5432` | `DIRECT_URL` | Crear las tablas (paso 4). |
+
+Sí, hacen falta las dos, y este es el punto donde más gente se atasca. El pooler de transacciones
+recicla la conexión entre sentencias: es justo lo que necesita una función serverless que aparece y
+desaparece, pero es también lo que rompe a `prisma db push`, que necesita una sesión estable para
+crear tablas. De ahí la segunda URL.
+
+El `?pgbouncer=true` no es decorativo: le dice a Prisma que no use *prepared statements*, que el
+pooler en modo transacción no sostiene.
+
+Nada de esto hay que configurarlo en `prisma/schema.prisma`. `scripts/proveedor-db.mjs` ajusta solo
+el `provider` y añade `directUrl` cuando detecta `DIRECT_URL` en el entorno.
 
 ## 2. Importar el repo
 
@@ -46,7 +58,8 @@ En **Settings → Environment Variables** (marcalas para *Production*, *Preview*
 
 | Variable | Valor |
 |---|---|
-| `DATABASE_URL` | La URL agrupada de Postgres del paso 1. |
+| `DATABASE_URL` | La del *transaction pooler* (6543) con `?pgbouncer=true`. |
+| `DIRECT_URL` | La del *session pooler* (5432). |
 | `AUTH_SECRET` | `openssl rand -base64 32`. Si la cambiás, se cierran todas las sesiones. |
 | `AUTH_URL` | Tu dominio con `https://` y **sin barra final**. |
 | `DISCORD_CLIENT_ID` | Portal de Discord → OAuth2. |
@@ -66,11 +79,15 @@ La compilación de Vercel genera el cliente de Prisma, pero **no crea las tablas
 máquina, con la misma URL de Postgres:
 
 ```bash
-DATABASE_URL="postgresql://…" npm run db:push
+DATABASE_URL="…6543/postgres?pgbouncer=true" DIRECT_URL="…5432/postgres" npm run db:push
 ```
 
 Si te lo saltás, la web despliega bien y falla al iniciar sesión, porque la tabla de usuarios no
 existe. Hay que repetirlo cada vez que cambie el esquema.
+
+Con `DIRECT_URL` puesta, el script añade `directUrl` al esquema y Prisma crea las tablas por la
+conexión de sesión, no por el pooler. Sin ella el `db push` puede quedarse colgado o fallar con un
+error de *prepared statement* que no dice nada de todo esto.
 
 > Ojo: `db:push` reescribe la línea `provider` de `prisma/schema.prisma` a `postgresql`. Es lo
 > esperado, pero si después seguís desarrollando en local, `npm run db:proveedor` con tu `.env`
