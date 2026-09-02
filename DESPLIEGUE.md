@@ -168,6 +168,8 @@ sitio que construya imágenes de Docker. Lo que cambia es dónde poner cada cosa
 - **Railway, Render, Fly.io.** Postgres gestionado + dos servicios apuntando al mismo repo, uno con
   `--target web` y otro con `--target bot`, ambos con la misma `DATABASE_URL`. El esquema se aplica
   con un *release command* o un job que ejecute `npx prisma db push`.
-- **Vercel para la web.** Funciona, pero el bot **no**: necesita una conexión permanente y las
-  funciones serverless no la mantienen. Habría que alojarlo aparte igualmente, así que tener las dos
-  mitades en el mismo sitio suele salir más simple y más barato.
+- **Vercel para la web.** Es el camino más rápido para abrirlo al público y tiene guía propia:
+  **[VERCEL.md](VERCEL.md)**. El bot **no** puede correr ahí —necesita una conexión permanente— pero
+  resulta que casi todo funciona sin él: entrar, invitar a AriBuilder y aplicar plantillas lo hace la
+  web por REST. Solo los botones de auto-rol y `/plantilla` piden un proceso encendido, que se puede
+  añadir después.

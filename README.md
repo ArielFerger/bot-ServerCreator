@@ -18,9 +18,11 @@ Discord **no permite que un bot cree servidores**. El flujo real es:
 Para usarlo **no hace falta instalar nada ni saber programar**: entrás en la web de la instancia,
 iniciás sesión con Discord, invitás a AriBuilder a tu servidor y aplicás una plantilla.
 
-Si querés levantar tu propia instancia pública, todo lo que hay que hacer está en
-**[DESPLIEGUE.md](DESPLIEGUE.md)**: Postgres, dominio con HTTPS, el bot marcado como público en
-Discord y los avisos de lo que cambia cuando lo usa gente que no sos vos.
+Si querés levantar tu propia instancia pública:
+
+- **[VERCEL.md](VERCEL.md)** — el camino corto. La web en Vercel, gratis, en unos minutos.
+- **[DESPLIEGUE.md](DESPLIEGUE.md)** — el despliegue completo con Docker: web y bot, Postgres,
+  dominio con HTTPS, copias de seguridad y los límites que aparecen al crecer.
 
 Lo que sigue es para **desarrollar** sobre el proyecto en tu máquina.
 

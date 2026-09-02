@@ -21,7 +21,7 @@
     "comprobar": "tsx --env-file-if-exists=.env scripts/comprobar.ts",
     "dev:web": "npm run dev -w @aribuilder/web",
     "dev:bot": "npm run dev -w @aribuilder/bot",
-    "build": "npm run db:generate && npm run build -w @aribuilder/web",
+    "build": "npm run build -w @aribuilder/web",
     "registrar": "npm run registrar -w @aribuilder/bot"
   },
   "devDependencies": {
