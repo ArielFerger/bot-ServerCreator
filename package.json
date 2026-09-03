@@ -32,5 +32,7 @@
     "vitest": "^2.1.8",
     "concurrently": "^9.1.2"
   },
-  "allowScripts": {}
+  "allowScripts": {
+    "@prisma/client@6.19.3": true
+  }
 }
